@@ -39,7 +39,7 @@ def hashjoin(partition_1, partition_2, memory_limit: int = 2):
     partition_1.set_len()
     partition_2.set_len()
 
-    len_p_1 = len(partition_1)  # Todo this is redundant
+    len_p_1 = partition_1.len  # Todo this is redundant
     idx_p_1 = 0
 
     hash_table = dict()
@@ -61,6 +61,7 @@ def hashjoin(partition_1, partition_2, memory_limit: int = 2):
                     for i in hash_table[elem[0]]:
                         yield *i, elem[0], *elem[1:]
             del hash_table
+            hash_table = dict()
         idx_p_1 += 1
 
     for elem in partition_2:
