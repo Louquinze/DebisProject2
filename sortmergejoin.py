@@ -4,14 +4,6 @@ import pickle
 from elements import BigList
 
 
-def feedfile(i, fname):
-    fname += f"{i}.pkl"
-    with open(fname, "rb") as f:
-        count = pickle.load(f)
-        for _ in range(count):
-            yield pickle.load(f)
-
-
 def creat_dict():
     int_dict = dict()
     str_dict = dict()
@@ -76,36 +68,36 @@ def sortmergejoin(partition_1, partition_2):
 
 if __name__ == '__main__':
     int_dict, str_dict = creat_dict()
-    follows = BigList(root="follows", max_length=int(1e05))
+    follows = BigList(root="follows", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/follows>", int_dict=int_dict,
                                         str_dict=str_dict, big_join=True):
         follows.add(elem)
 
-    friendOf = BigList(root="friendOf", max_length=int(1e05))
+    friendOf = BigList(root="friendOf", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/friendOf>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         friendOf.add(elem)
 
-    Join_1 = BigList(root="Join_1", max_length=int(1e05))
+    Join_1 = BigList(root="Join_1", max_length=int(1e07))
     for idx, elem in enumerate(sortmergejoin(follows, friendOf)):
-        # Join_1.add(elem)
+        Join_1.add(elem)
         if idx % int(1e06) == 0:
             print(idx, elem)
     del follows
     del friendOf
     print("finished Join_1")
     """
-    likes = BigList(root="friendOf", max_length=int(1e05))
+    likes = BigList(root="friendOf", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/likes>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         likes.add(elem)
 
-    hasReview = BigList(root="hasReview", max_length=int(1e05))
+    hasReview = BigList(root="hasReview", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://purl.org/stuff/rev#hasReview>", big_join=True,
                                      int_dict=int_dict, str_dict=str_dict):
         hasReview.add(elem)
 
-    Join_2 = BigList(root="Join_2", max_length=int(1e05))
+    Join_2 = BigList(root="Join_2", max_length=int(1e07))
     for elem in sortmergejoin(likes, hasReview):
         Join_2.add(elem)
     del likes
