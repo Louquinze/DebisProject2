@@ -32,7 +32,15 @@ def get_vertical_partitions(key, int_dict: dict = None, str_dict: dict = None, b
                 except Exception as e:
                     warnings.warn(f"exception: {e}")
     else:
-        raise NotImplementedError()
+        # Todo create a mapping to convert this back to txt
+        with open("data/100k.txt") as f:
+            for line in f:
+                try:
+                    line = [hash(i) for i in line.replace("\n", "").replace("\t", " ").split(" ")]
+                    if line[1] == hash(key):
+                        yield line[0], line[2]
+                except Exception as e:
+                    warnings.warn(f"exception: {e}")
 
 
 def hashjoin(partition_1, partition_2, memory_limit: int = 2):
