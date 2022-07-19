@@ -45,8 +45,10 @@ def get_vertical_partitions(key, int_dict: dict = None, str_dict: dict = None, b
 
 
 def sortmergejoin(partition_1, partition_2):
-    partition_1.sort(key=lambda tup: tup[-1])  # sort first part with respect to the object
-    partition_2.sort(key=lambda tup: tup[0])  # sort second part with respect to the subject
+    partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
+    partition_2.set_key(key=lambda tup: tup[0])  # sort second part with respect to the subject
+    partition_1.sort()
+    partition_2.sort()
 
     len_p_1 = len(partition_1)
     len_p_2 = len(partition_2)
@@ -74,29 +76,27 @@ def sortmergejoin(partition_1, partition_2):
 
 if __name__ == '__main__':
     int_dict, str_dict = creat_dict()
-    """follows = BigList(root="follows", max_length=int(1e06))
+    follows = BigList(root="follows", max_length=1000)
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/follows>", int_dict=int_dict,
                                         str_dict=str_dict, big_join=True):
         follows.add(elem)
 
-    friendOf = BigList(root="friendOf", max_length=int(1e06))
+    friendOf = BigList(root="friendOf", max_length=1000)
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/friendOf>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         friendOf.add(elem)
 
-    likes = BigList(root="friendOf", max_length=int(1e06))
+    for elem in sortmergejoin(follows, friendOf):
+        print(elem)
+    """likes = BigList(root="friendOf", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/likes>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
-        likes.add(elem)"""
+        likes.add(elem)
 
     hasReview = BigList(root="hasReview", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://purl.org/stuff/rev#hasReview>", big_join=True,
                                      int_dict=int_dict, str_dict=str_dict):
-        hasReview.add(elem)
+        hasReview.add(elem)"""
 
-    hasReview.set_key(lambda tup: tup[-1])
-    hasReview.sort()
-    for i in range(10):
-        print(hasReview[i])
 
 

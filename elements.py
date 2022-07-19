@@ -21,10 +21,19 @@ class BigList:
         shutil.rmtree(self.root)
 
     def __getitem__(self, indices):
+        # Todo remember last indices and load form cash
         idx_file = indices // self.max_length
         idx_elem = indices % self.max_length
         self.save_set()
         return sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)[idx_elem]
+
+    def __len__(self):
+        self.save_set()
+        lenght = 0
+        for i in range(self.file_count):
+            lenght += len(pickle.load(open(f"{self.root}/{i}.pkl", "rb")))
+
+        return lenght
 
     def add(self, element):
         self.set.add(element)
@@ -32,6 +41,7 @@ class BigList:
             self.save_set()
 
     def save_set(self):
+        # Todo balances, that indexing still is true
         if len(self.set) > 0:
             with open(f"{self.root}/{self.file_count}.pkl", "wb") as f:
                 pickle.dump(self.set, f)
