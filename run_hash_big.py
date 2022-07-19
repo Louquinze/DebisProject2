@@ -1,5 +1,5 @@
 from util.elements import BigList
-from util.join import creat_dict, get_vertical_partitions, sortmergejoin
+from util.join import creat_dict, get_vertical_partitions, hashjoin
 
 
 if __name__ == '__main__':
@@ -15,7 +15,7 @@ if __name__ == '__main__':
         friendOf.add(elem)
 
     Join_1 = BigList(root="Join_1", max_length=int(1e07))
-    for idx, elem in enumerate(sortmergejoin(follows, friendOf)):
+    for idx, elem in enumerate(hashjoin(follows, friendOf)):
         Join_1.add(elem)
         if idx % int(1e06) == 0:
             print(idx, elem)
@@ -34,13 +34,13 @@ if __name__ == '__main__':
         hasReview.add(elem)
 
     Join_2 = BigList(root="Join_2", max_length=int(1e07))
-    for elem in sortmergejoin(likes, hasReview):
+    for elem in hashjoin(likes, hasReview):
         Join_2.add(elem)
     del likes
     del hasReview
     print("finished Join_2")
 
-    for idx, elem in enumerate(sortmergejoin(Join_1, Join_2)):
+    for idx, elem in enumerate(hashjoin(Join_1, Join_2)):
         idx_save = idx
         if idx % int(1e06) == 0:
             print(idx, elem)

@@ -1,5 +1,6 @@
 import os
 import warnings
+import sys
 
 
 def creat_dict():
@@ -34,6 +35,41 @@ def get_vertical_partitions(key, int_dict: dict = None, str_dict: dict = None, b
         raise NotImplementedError()
 
 
+def hashjoin(partition_1, partition_2, memory_limit: int = 2):
+    partition_1.set_len()
+    partition_2.set_len()
+
+    len_p_1 = len(partition_1)  # Todo this is redundant
+    idx_p_1 = 0
+
+    hash_table = dict()
+
+    while True:
+        if idx_p_1 >= len_p_1 - 1:
+            break
+        # Add tuple to hash_table
+        if partition_1[idx_p_1][-1] in hash_table:
+            hash_table[partition_1[idx_p_1][-1]].add(partition_1[idx_p_1][:-1])
+        else:
+            hash_table[partition_1[idx_p_1][-1]] = {partition_1[idx_p_1][:-1]}
+
+        # if in memory table exceeds limit
+        if sys.getsizeof(hash_table) / 1e6 > memory_limit:
+            # scan p_2 and yield the points
+            for elem in partition_2:
+                if elem[0] in hash_table:
+                    for i in hash_table[elem[0]]:
+                        yield *i, elem[0], *elem[1:]
+            del hash_table
+        idx_p_1 += 1
+
+    for elem in partition_2:
+        if elem[0] in hash_table:
+            for i in hash_table[elem[0]]:
+                yield *i, elem[0], *elem[1:]
+    del hash_table
+
+
 def sortmergejoin(partition_1, partition_2):
     # Todo apdate this that i can use any object with inplace sorting
     partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
@@ -49,7 +85,7 @@ def sortmergejoin(partition_1, partition_2):
     mark_p_2 = None
 
     while True:
-        if idx_p_1 >= len_p_1 - 1 or idx_p_2 >= len_p_2 - 1:  # breaking condition, Todo len - 1 ?
+        if idx_p_1 >= len_p_1 or idx_p_2 >= len_p_2:  # breaking condition, Todo len - 1 ?
             break
         if partition_1[idx_p_1][-1] < partition_2[idx_p_2][0]:
             idx_p_1 += 1  # advance p_1

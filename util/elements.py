@@ -18,6 +18,19 @@ class BigList:
         self.key = None
         self.cached_file = None
         self.cache = None
+        self.idx = -1
+        self.len = None
+
+    def __next__(self):
+        self.idx += 1
+        if self.idx >= self.len-1:
+            self.idx = -1
+            raise StopIteration
+        else:
+            return self[self.idx]
+
+    def __iter__(self):
+        return self
 
     def __del__(self):
         shutil.rmtree(self.root)
@@ -33,12 +46,16 @@ class BigList:
         return self.cache[idx_elem]
 
     def __len__(self):
+        # Todo optimize this
         self.save_set()
         lenght = 0
         for i in range(self.file_count):
             lenght += len(pickle.load(open(f"{self.root}/{i}.pkl", "rb")))
 
         return lenght
+
+    def set_len(self):
+        self.len = len(self)
 
     def add(self, element):
         self.set.add(element)
