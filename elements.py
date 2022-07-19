@@ -16,6 +16,8 @@ class BigList:
         self.set = set()
         self.file_count = 0
         self.key = None
+        self.cached_file = None
+        self.cache = None
 
     def __del__(self):
         shutil.rmtree(self.root)
@@ -25,7 +27,10 @@ class BigList:
         idx_file = indices // self.max_length
         idx_elem = indices % self.max_length
         self.save_set()
-        return sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)[idx_elem]
+        if idx_file != self.cached_file:
+            self.cache = sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)
+            self.cached_file = idx_file
+        return self.cache[idx_elem]
 
     def __len__(self):
         self.save_set()
@@ -49,9 +54,11 @@ class BigList:
                 self.file_count += 1
 
     def set_key(self, key):
+        self.cached_file = None
         self.key = key
 
     def sort(self, reverse: bool = False):
+        self.cached_file = None
         self.save_set()
 
         chunks = [open(f"{self.root}/{c}.pkl", "rb") for c in range(self.file_count)]
