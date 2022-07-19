@@ -15,10 +15,16 @@ class BigList:
         self.max_length = max_length
         self.set = set()
         self.file_count = 0
-        self.key = lambda tup: tup[0]
+        self.key = None
 
     def __del__(self):
         shutil.rmtree(self.root)
+
+    def __getitem__(self, indices):
+        idx_file = indices // self.max_length
+        idx_elem = indices % self.max_length
+
+        return sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)[idx_elem]
 
     def add(self, element):
         self.set.add(element)
@@ -31,6 +37,9 @@ class BigList:
                 pickle.dump(self.set, f)
                 self.set.clear()
                 self.file_count += 1
+
+    def set_key(self, key):
+        self.key = key
 
     def sort(self, reverse: bool = False):
         self.save_set()
@@ -46,12 +55,6 @@ class BigList:
 
         shutil.rmtree(old_root)
 
-    def __getitem__(self, indices):
-        idx_file = indices // self.max_length
-        idx_elem = indices % self.max_length
-
-        return sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)[idx_elem]
-
 
 if __name__ == '__main__':
     a = BigList(root="tmp", max_length=10000)
@@ -59,6 +62,7 @@ if __name__ == '__main__':
     for i in range(int(1e5)):
         a.add((-1*i, -1*i))
 
+    a.set_key(lambda tup: tup[-1])
     a.sort()
 
     for i in range(10):
