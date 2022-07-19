@@ -4,7 +4,7 @@ import shutil
 import sys
 import pickle
 from pathlib import Path
-from util.heapq import merge
+from util.heapq_adapt import merge
 
 
 class BigList:
