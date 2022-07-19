@@ -86,7 +86,7 @@ if __name__ == '__main__':
     del follows
     del friendOf
     print("finished Join_1")
-    """
+
     likes = BigList(root="friendOf", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/likes>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
@@ -102,9 +102,12 @@ if __name__ == '__main__':
         Join_2.add(elem)
     del likes
     del hasReview
-    print("finished Join_1")"""
+    print("finished Join_1")
 
-    # for elem in sortmergejoin(Join_1, Join_2):
-    #     print(elem)
+    for idx, elem in enumerate(sortmergejoin(Join_1, Join_2)):
+        idx_save = idx
+        if idx % int(1e06) == 0:
+            print(idx, elem)
+    print(idx_save)
 
 
