@@ -23,7 +23,7 @@ class BigList:
     def __getitem__(self, indices):
         idx_file = indices // self.max_length
         idx_elem = indices % self.max_length
-
+        self.save_set()
         return sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)[idx_elem]
 
     def add(self, element):
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     a = BigList(root="tmp", max_length=10000)
 
     for i in range(int(1e5)):
-        a.add((-1*i, -1*i))
+        a.add((-1 * i, -1 * i))
 
     a.set_key(lambda tup: tup[-1])
     a.sort()

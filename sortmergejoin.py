@@ -74,24 +74,29 @@ def sortmergejoin(partition_1, partition_2):
 
 if __name__ == '__main__':
     int_dict, str_dict = creat_dict()
-    follows = BigList(root="follows", memory_limit=10)
+    """follows = BigList(root="follows", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/follows>", int_dict=int_dict,
                                         str_dict=str_dict, big_join=True):
         follows.add(elem)
 
-    friendOf = BigList(root="friendOf", memory_limit=10)
+    friendOf = BigList(root="friendOf", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/friendOf>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         friendOf.add(elem)
 
-    likes = BigList(root="friendOf", memory_limit=10)
+    likes = BigList(root="friendOf", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/likes>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
-        likes.add(elem)
+        likes.add(elem)"""
 
-    hasReview = BigList(root="hasReview", memory_limit=10)
+    hasReview = BigList(root="hasReview", max_length=int(1e06))
     for elem in get_vertical_partitions(key="<http://purl.org/stuff/rev#hasReview>", big_join=True,
                                      int_dict=int_dict, str_dict=str_dict):
         hasReview.add(elem)
+
+    hasReview.set_key(lambda tup: tup[-1])
+    hasReview.sort()
+    for i in range(10):
+        print(hasReview[i])
 
 
