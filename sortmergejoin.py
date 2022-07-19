@@ -58,7 +58,7 @@ def sortmergejoin(partition_1, partition_2):
     mark_p_2 = None
 
     while True:
-        if idx_p_1 == len_p_1 or idx_p_2 == len_p_2:  # breaking condition
+        if idx_p_1 == len_p_1 or idx_p_2 == len_p_2:  # breaking condition, Todo len - 1 ?
             break
         if partition_1[idx_p_1][-1] < partition_2[idx_p_2][0]:
             idx_p_1 += 1  # advance p_1
