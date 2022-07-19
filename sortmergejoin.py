@@ -1,6 +1,4 @@
 import warnings
-import sys
-import pickle
 from elements import BigList
 
 
