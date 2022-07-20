@@ -5,17 +5,17 @@ import time
 if __name__ == '__main__':
     start = time.time()
     int_dict, str_dict = creat_dict()
-    follows = BigList(root="sort_big_follows", max_length=int(1e07))
+    follows = BigList(root="7_sort_big_follows", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/follows>", int_dict=int_dict,
                                         str_dict=str_dict, big_join=True):
         follows.add(elem)
 
-    friendOf = BigList(root="sort_big_friendOf", max_length=int(1e07))
+    friendOf = BigList(root="7_sort_big_friendOf", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/friendOf>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         friendOf.add(elem)
 
-    Join_1 = BigList(root="sort_big_Join_1", max_length=int(1e07))
+    Join_1 = BigList(root="7_sort_big_Join_1", max_length=int(1e07))
     for idx, elem in enumerate(sortmergejoin(follows, friendOf)):
         Join_1.add(elem)
         if idx % int(1e06) == 0:
@@ -24,17 +24,17 @@ if __name__ == '__main__':
     del friendOf
     print("finished Join_1")
 
-    likes = BigList(root="sort_big_friendOf", max_length=int(1e07))
+    likes = BigList(root="7_sort_big_friendOf", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://db.uwaterloo.ca/~galuc/wsdbm/likes>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         likes.add(elem)
 
-    hasReview = BigList(root="sort_big_hasReview", max_length=int(1e07))
+    hasReview = BigList(root="7_sort_big_hasReview", max_length=int(1e07))
     for elem in get_vertical_partitions(key="<http://purl.org/stuff/rev#hasReview>", big_join=True,
                                         int_dict=int_dict, str_dict=str_dict):
         hasReview.add(elem)
 
-    Join_2 = BigList(root="sort_big_Join_2", max_length=int(1e07))
+    Join_2 = BigList(root="7_sort_big_Join_2", max_length=int(1e07))
     for elem in sortmergejoin(likes, hasReview):
         Join_2.add(elem)
         if idx % int(1e06) == 0:
