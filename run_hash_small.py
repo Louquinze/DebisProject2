@@ -1,8 +1,9 @@
 from util.elements import BigList
 from util.join import creat_dict, get_vertical_partitions, hashjoin
-
+import time
 
 if __name__ == '__main__':
+    start = time.time()
     int_dict, str_dict = creat_dict()
     follows = BigList(root="follows", max_length=int(1e07))
     for elem in get_vertical_partitions(key="wsdbm:follows", int_dict=int_dict,
@@ -15,7 +16,7 @@ if __name__ == '__main__':
         friendOf.add(elem)
 
     Join_1 = BigList(root="Join_1", max_length=int(1e07))
-    for idx, elem in enumerate(hashjoin(follows, friendOf)):
+    for idx, elem in enumerate(hashjoin(follows, friendOf, memory_limit=4)):
         Join_1.add(elem)
         if idx % int(1e06) == 0:
             print(idx, elem)
@@ -30,17 +31,24 @@ if __name__ == '__main__':
 
     hasReview = BigList(root="hasReview", max_length=int(1e07))
     for elem in get_vertical_partitions(key="rev:hasReview", big_join=False,
-                                     int_dict=int_dict, str_dict=str_dict):
+                                        int_dict=int_dict, str_dict=str_dict):
         hasReview.add(elem)
 
     Join_2 = BigList(root="Join_2", max_length=int(1e07))
-    for elem in hashjoin(likes, hasReview):
+    for elem in hashjoin(likes, hasReview, memory_limit=4):
         Join_2.add(elem)
+        if idx % int(1e06) == 0:
+            print(idx, elem)
     del likes
     del hasReview
     print("finished Join_2")
 
-    for idx, elem in enumerate(hashjoin(Join_1, Join_2)):
+    for idx, elem in enumerate(hashjoin(Join_1, Join_2, memory_limit=4)):
         idx_save = idx
         if idx % int(1e06) == 0:
             print(idx, elem)
+
+    end = time.time()
+    duration = end - start
+    print(f"Time hash join small: {duration // 3600}h  {(duration // 60) % 60}min  {duration % 60}sec")
+

@@ -1,0 +1,4 @@
+python run_hash_big.py
+python run_sort_merge_big.py
+python run_hash_small.py
+python run_sort_merge_small.py
