@@ -1,6 +1,8 @@
 import os
 import warnings
 import sys
+from util.elements import BigDict
+import time
 
 
 def creat_dict():
@@ -77,6 +79,35 @@ def hashjoin(partition_1, partition_2, memory_limit: int = 2):
             for i in hash_table[elem[0]]:
                 yield *i, elem[0], *elem[1:]
     del hash_table
+
+
+def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool = False):
+    # create a hash_table for both p
+    if sorted:
+        partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
+        partition_2.set_key(key=lambda tup: tup[0])  # sort second part with respect to the subject
+        partition_1.sort()
+        partition_2.sort()
+
+    partition_1.set_len()
+    partition_2.set_len()
+
+    time_idx = time.time()
+    hash_table_1 = BigDict(root=f"root_{time_idx}_1", memory_limit=memory_limit)
+    hash_table_2 = BigDict(root=f"root_{time_idx}_2", memory_limit=memory_limit)
+
+    for i in partition_1:  # hash p_1
+        hash_table_1[i[-1]] = i[:-1]
+
+    for i in partition_2:  # hash p_2
+        hash_table_2[i[0]] = i[1:]
+
+    for key in hash_table_1.keys():
+        if key in hash_table_2.drive_location:
+            # object equals subject
+            for value_1 in hash_table_1[key]:
+                for value_2 in hash_table_2[key]:
+                    yield *value_1, key, *value_2
 
 
 def sortmergejoin(partition_1, partition_2):

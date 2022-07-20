@@ -7,6 +7,62 @@ from pathlib import Path
 from util.heapq_adapt import merge
 
 
+class BigDict:
+    # if sys.getsizeof(hash_table) / 1e6 > memory_limit:
+    def __init__(self, root, memory_limit: int = 2):
+        self.root = root + f"_{hash(time.time())}"
+        Path(self.root).mkdir(parents=True, exist_ok=True)
+
+        self.memory_limit = memory_limit
+        self.hash_table = dict()
+        self.drive_location = dict()
+        self.file_count = 0
+        self.loaded_file = None
+        self.cache = None
+
+    def __setitem__(self, key, value):
+        if key in self.hash_table:
+            self.hash_table[key].add(value)
+        else:
+            if key in self.drive_location:
+                self.drive_location[key].add(self.file_count)
+            else:
+                self.drive_location[key] = {self.file_count}
+            self.hash_table[key] = {value}
+
+        if sys.getsizeof(self.hash_table) / 1e6 > self.memory_limit:
+            self.save_set()
+
+    def __getitem__(self, item):
+        self.save_set()
+        if item not in self.drive_location:
+            raise KeyError
+        for i, idx_file in enumerate(self.drive_location[item]):
+            if self.loaded_file != idx_file:
+                self.loaded_file = idx_file
+                self.cache = pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))
+            if i == 0:
+                res = self.cache[item]
+            else:
+                res = res | self.cache[item]
+        return res
+
+    def __del__(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def save_set(self):
+        # Todo balances, that indexing still is true
+        if len(self.hash_table) > 0:
+            with open(f"{self.root}/{self.file_count}.pkl", "wb") as f:
+                pickle.dump(self.hash_table, f)
+                self.hash_table.clear()
+                self.file_count += 1
+
+    def keys(self):
+        for key in self.drive_location.keys():
+            yield key
+
+
 class BigList:
     def __init__(self, root, max_length: int = 2):
         self.root = root + f"_{hash(time.time())}"
