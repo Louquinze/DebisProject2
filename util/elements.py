@@ -33,7 +33,7 @@ class BigList:
         return self
 
     def __del__(self):
-        shutil.rmtree(self.root)
+        shutil.rmtree(self.root, ignore_errors=True)
 
     def __getitem__(self, indices):
         # Todo remember last indices and load form cash
@@ -87,7 +87,7 @@ class BigList:
         for elem in merge(*chunks, key=self.key, reverse=reverse):
             self.add(elem)
 
-        shutil.rmtree(old_root)
+        shutil.rmtree(old_root, ignore_errors=True)
 
 
 if __name__ == '__main__':
