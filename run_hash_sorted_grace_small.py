@@ -50,5 +50,5 @@ if __name__ == '__main__':
 
     end = time.time()
     duration = end - start
-    print(f"Time hash grace join small: {duration // 3600}h  {(duration // 60) % 60}min  {duration % 60}sec")
+    print(f"Time hash grace join sorted small: {duration // 3600}h  {(duration // 60) % 60}min  {duration % 60}sec")
 
