@@ -31,12 +31,6 @@ if __name__ == '__main__':
                                         str_dict=str_dict, big_join=big_join):
         follows.add(elem)
 
-    print(len(follows))
-    print(follows[31886])
-    print(follows.pop())
-    follows.set_len()
-    print(len(follows))
-    """
     if args.dataset == 1:
         friendOf = BigList(root=f"fr_{args.id}_{args.join}_{args.dataset}_{args.max_length}_{args.memory_limit}",
                            max_length=args.max_length)
@@ -149,4 +143,3 @@ if __name__ == '__main__':
     with open(f"res/{args.id}_{args.join}_{args.dataset}_{args.max_length}_{args.memory_limit}.csv", "w") as f:
         f.write(f"h,min,sec,duration,id,join,dataset\n"
                 f"{duration // 3600},{(duration // 60) % 60},{duration % 60},{duration},{args.id},{args.join},{args.dataset}")
-    """
