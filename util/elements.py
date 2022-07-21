@@ -99,7 +99,7 @@ class BigList:
         if idx_file != self.cached_file:
             self.cache = sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)
             self.cached_file = idx_file
-        return self.cache[idx_elem]
+        return self.cache[idx_elem]  # -1 ?
 
     def __len__(self):
         # Todo optimize this
@@ -115,7 +115,7 @@ class BigList:
 
     def add(self, element):
         self.set.add(element)
-        if len(self.set) > self.max_length:
+        if len(self.set) >= self.max_length:
             self.save_set()
 
     def save_set(self):
