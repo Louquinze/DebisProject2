@@ -13,9 +13,13 @@ for idx, file in enumerate(os.listdir("res")):
 df["join"].replace(0, "hash_join", inplace=True)
 df["join"].replace(1, "parallel_sort_join", inplace=True)
 df["join"].replace(2, "hash_sort_join", inplace=True)
-df["join"].replace(3, "hash_grace_join", inplace=True)
+df["join"].replace(3, "grace_hash_join", inplace=True)
 
 sns.boxplot(x="join", y="duration", data=df[df["dataset"] == 0])
+plt.show()
+
+# only hash joins
+sns.boxplot(x="join", y="duration", data=df[(df["dataset"] == 0) & (df["join"] != "parallel_sort_join")])
 plt.show()
 
 sns.boxplot(x="join", y="duration", data=df[df["dataset"] == 1])
