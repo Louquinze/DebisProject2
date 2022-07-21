@@ -55,6 +55,8 @@ if __name__ == '__main__':
         join = sortmergejoin(follows, friendOf)
     elif args.join == 2:
         join = hashsortjoin(follows, friendOf, memory_limit=args.memory_limit)
+    elif args.join == 3:
+        join = gracehashjoin(follows, friendOf, memory_limit=args.memory_limit)
 
     for idx, elem in enumerate(join):
         Join_1.add(elem)
@@ -99,6 +101,8 @@ if __name__ == '__main__':
         join = sortmergejoin(likes, hasReview)
     elif args.join == 2:
         join = hashsortjoin(likes, hasReview, memory_limit=args.memory_limit)
+    elif args.join == 3:
+        join = gracehashjoin(likes, hasReview, memory_limit=args.memory_limit)
 
     Join_2 = BigList(root=f"j_2_{args.id}_{args.join}_{args.dataset}_{args.max_length}_{args.memory_limit}",
                      max_length=args.max_length)
@@ -118,6 +122,8 @@ if __name__ == '__main__':
         join = sortmergejoin(Join_1, Join_2)
     elif args.join == 2:
         join = hashsortjoin(Join_1, Join_2, memory_limit=args.memory_limit)
+    elif args.join == 3:
+        join = gracehashjoin(Join_1, Join_2, memory_limit=args.memory_limit)
 
     for idx, elem in enumerate(join):
         idx_save = idx
