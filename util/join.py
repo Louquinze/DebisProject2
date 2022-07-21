@@ -81,6 +81,46 @@ def hashjoin(partition_1, partition_2, memory_limit: int = 2):
     del hash_table
 
 
+def hashsortjoin(partition_1, partition_2, memory_limit: int = 2):
+    partition_1.set_len()
+    partition_2.set_len()
+
+    # sort second part with respect to the subject, less fragmentation on avg
+    partition_2.set_key(key=lambda tup: tup[0])
+    partition_2.sort()
+
+    len_p_1 = partition_1.len  # Todo this is redundant
+    idx_p_1 = 0
+
+    hash_table = dict()
+
+    while True:
+        if idx_p_1 >= len_p_1 - 1:
+            break
+        # Add tuple to hash_table
+        if partition_1[idx_p_1][-1] in hash_table:
+            hash_table[partition_1[idx_p_1][-1]].add(partition_1[idx_p_1][:-1])
+        else:
+            hash_table[partition_1[idx_p_1][-1]] = {partition_1[idx_p_1][:-1]}
+
+        # if in memory table exceeds limit
+        if sys.getsizeof(hash_table) / 1e6 > memory_limit:
+            # scan p_2 and yield the points
+            for elem in partition_2:
+                if elem[0] in hash_table:
+                    for i in hash_table[elem[0]]:
+                        yield *i, elem[0], *elem[1:]
+            del hash_table
+            hash_table = dict()
+        idx_p_1 += 1
+
+    for elem in partition_2:
+        if elem[0] in hash_table:
+            for i in hash_table[elem[0]]:
+                yield *i, elem[0], *elem[1:]
+    del hash_table
+
+
 def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool = False):
     # create a hash_table for both p
     if sorted:
