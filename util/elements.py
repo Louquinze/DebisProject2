@@ -91,6 +91,35 @@ class BigList:
     def __del__(self):
         shutil.rmtree(self.root, ignore_errors=True)
 
+    def __setitem__(self, indices, value):
+        idx_file = indices // self.max_length
+        idx_elem = indices % self.max_length
+        self.save_set()
+
+        if idx_file != self.cached_file:
+            self.cache = sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)
+
+        self.cached_file = idx_file
+        self.cache.insert(idx_elem, value)  # value inserted
+        move_object = self.cache[-1]
+        del self.cache[-1]
+        with open(f"{self.root}/{idx_file}.pkl", "wb") as f:
+            pickle.dump(set(self.cache), f)
+
+        # move values
+        indicator = self.max_length == len(self.cache)
+        for c in range(idx_file + 1, self.file_count):
+            self.cache = sorted(list(pickle.load(open(f"{self.root}/{c}.pkl", "rb"))), key=self.key)
+            self.cached_file = c
+            indicator = self.max_length == len(self.cache)
+            self.cache.insert(0, move_object)
+            move_object = self.cache[-1]
+            del self.cache[-1]
+            with open(f"{self.root}/{c}.pkl", "wb") as f:
+                pickle.dump(set(self.cache), f)
+        if indicator:
+            self.add(move_object)
+
     def __getitem__(self, indices):
         # Todo remember last indices and load form cash
         idx_file = indices // self.max_length
@@ -109,6 +138,22 @@ class BigList:
             lenght += len(pickle.load(open(f"{self.root}/{i}.pkl", "rb")))
 
         return lenght
+
+    def pop(self):
+        self.save_set()
+
+        if self.file_count-1 != self.cached_file:
+            self.cache = sorted(list(pickle.load(open(f"{self.root}/{self.file_count-1}.pkl", "rb"))), key=self.key)
+            self.cached_file = self.file_count-1
+
+        res = self.cache.pop()
+        with open(f"{self.root}/{self.file_count-1}.pkl", "wb") as f:
+            pickle.dump(set(self.cache), f)
+
+        return res
+
+    def append(self, element):
+        self.add(element)
 
     def set_len(self):
         self.len = len(self)
