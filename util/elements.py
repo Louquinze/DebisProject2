@@ -130,17 +130,21 @@ class BigList:
         self.cached_file = None
         self.key = key
 
+    def chunks(self):
+        for c in range(self.file_count):
+            yield f"{self.root}/{c}.pkl"
+
     def sort(self, reverse: bool = False):
         self.cached_file = None
         self.save_set()
 
-        chunks = [open(f"{self.root}/{c}.pkl", "rb") for c in range(self.file_count)]
+        chunks = [f"{self.root}/{c}.pkl" for c in range(self.file_count)]
         old_root = self.root
         self.root = f"{self.root}_{hash(time.time())}"
         Path(self.root).mkdir(parents=True, exist_ok=True)
         self.file_count = 0
 
-        for elem in merge(*chunks, key=self.key, reverse=reverse):
+        for elem in merge(chunks, key=self.key, reverse=reverse):
             self.add(elem)
 
         shutil.rmtree(old_root, ignore_errors=True)

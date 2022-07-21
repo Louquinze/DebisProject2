@@ -314,7 +314,7 @@ def _siftup_max(heap, pos):
     heap[pos] = newitem
     _siftdown_max(heap, startpos, pos)
 
-def merge(*iterables, key=None, reverse=False):
+def merge(iterables, key=None, reverse=False):
     '''Merge multiple sorted inputs into a single sorted output.
 
     Similar to sorted(itertools.chain(*iterables)) but returns a generator,
@@ -331,7 +331,6 @@ def merge(*iterables, key=None, reverse=False):
     ['dog', 'cat', 'fish', 'horse', 'kangaroo']
 
     '''
-
     h = []
     h_append = h.append
 
@@ -347,7 +346,8 @@ def merge(*iterables, key=None, reverse=False):
         direction = 1
 
     if key is None:
-        for order, it in enumerate(map(iter, iterables)):
+        for order, it in enumerate(iterables):
+            it = open(it, "rb")
             it = pickle.load(it)
             it = iter(sorted(it, key=key))
             try:
@@ -372,7 +372,8 @@ def merge(*iterables, key=None, reverse=False):
             yield from next.__self__
         return
 
-    for order, it in enumerate(map(iter, iterables)):
+    for order, it in enumerate(iterables):
+        it = open(it, "rb")
         it = pickle.load(it)
         it = iter(sorted(it, key=key))
         try:
