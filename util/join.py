@@ -85,7 +85,7 @@ def hashsortjoin(partition_1, partition_2, memory_limit: int = 2):
     partition_1.set_len()
     partition_2.set_len()
 
-    # sort second part with respect to the subject, less fragmentation on avg
+    # sort first part with respect to the subject, less fragmentation on avg
     partition_2.set_key(key=lambda tup: tup[0])
     partition_2.sort()
 
