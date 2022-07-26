@@ -4,7 +4,9 @@ import shutil
 import sys
 import pickle
 from pathlib import Path
-from util.heapq_adapt import merge
+
+
+# from util.heapq_adapt import merge
 
 
 class BigDict:
@@ -79,7 +81,7 @@ class BigList:
 
     def __next__(self):
         self.idx += 1
-        if self.idx >= self.len-1:
+        if self.idx >= self.len - 1:
             self.idx = -1
             raise StopIteration
         else:
@@ -133,21 +135,23 @@ class BigList:
     def __len__(self):
         # Todo optimize this
         self.save_set()
-        lenght = 0
-        for i in range(self.file_count):
-            lenght += len(pickle.load(open(f"{self.root}/{i}.pkl", "rb")))
+        if self.file_count > 1:
+            lenght = self.max_length * (self.file_count - 2)
+            lenght += len(pickle.load(open(f"{self.root}/{self.file_count - 1}.pkl", "rb")))
+        else:
+            lenght = len(pickle.load(open(f"{self.root}/{self.file_count - 1}.pkl", "rb")))
 
         return lenght
 
     def pop(self):
         self.save_set()
 
-        if self.file_count-1 != self.cached_file:
-            self.cache = sorted(list(pickle.load(open(f"{self.root}/{self.file_count-1}.pkl", "rb"))), key=self.key)
-            self.cached_file = self.file_count-1
+        if self.file_count - 1 != self.cached_file:
+            self.cache = sorted(list(pickle.load(open(f"{self.root}/{self.file_count - 1}.pkl", "rb"))), key=self.key)
+            self.cached_file = self.file_count - 1
 
         res = self.cache.pop()
-        with open(f"{self.root}/{self.file_count-1}.pkl", "wb") as f:
+        with open(f"{self.root}/{self.file_count - 1}.pkl", "wb") as f:
             pickle.dump(set(self.cache), f)
 
         return res
@@ -197,28 +201,64 @@ class BigList:
         """
         # Todo implement stack sort merge
         #   1. always scan for the "smallest values" firest value. Store it for all arrays to search ...
-        # init
-        heap = BigList(self.root, self.max_length)
-        for c in range(self.file_count):
-            file = f"{self.root}/{c}.pkl"
-            tmp = sorted(list(pickle.load(open(file, "rb"))), key=self.key)
-            heap.append(tmp[0])
-            del tmp[0]
-            self.cached_file = c
-        # now insert smallest and load new smallest
-        # check if list is empty, if all are empty end the loop
+        self.save_set()
 
-        raise NotImplementedError
+        pointer = [0 for _ in range(self.file_count)]
+        skips = [False for _ in range(self.file_count)]
+        res = BigList(self.root, self.max_length)
+
+        value = None
+        idx = None
+
+        while True:
+            if sum(skips) == len(skips):
+                break
+
+            if idx is None:
+                values = []
+                for c in range(self.file_count):
+                    tmp = pickle.load(open(f"{self.root}/{c}.pkl", "rb"))
+                    tmp = sorted(list(tmp), key=self.key)
+                    if len(tmp) == pointer[c]:  # ignore file
+                        values.append(None)
+                        skips[c] = True
+                    else:
+                        values.append(tmp[pointer[c]])
+            else:
+                tmp = pickle.load(open(f"{self.root}/{idx}.pkl", "rb"))
+                tmp = sorted(list(tmp), key=self.key)
+                if len(tmp) == pointer[idx] or skips[idx]:  # ignore file
+                    values[idx] = None
+                    skips[idx] = True
+                else:
+                    values[idx] = tmp[pointer[idx]]
+
+            for idx_i, value_i in enumerate(values):
+                if skips[idx_i]:
+                    continue
+                if idx_i == 0:
+                    value = value_i
+                    idx = idx_i
+                elif self.key(value) > self.key(value_i):
+                    value = value_i
+                    idx = idx_i
+            res.add(value)
+            pointer[idx] += 1
+
+        res.save_set()
+        return res
 
 
 if __name__ == '__main__':
-    a = BigList(root="tmp", max_length=10000)
+    a = BigList(root="tmp", max_length=1000)
 
-    for i in range(int(1e5)):
+    for i in range(int(100)):
         a.add((-1 * i, -1 * i))
 
+    a.save_set()
     a.set_key(lambda tup: tup[-1])
-    a.sort()
+    a = a.sort()
 
-    for i in range(10):
-        print(a[i])
+    a.set_len()
+    for i in a:
+        print(i)
