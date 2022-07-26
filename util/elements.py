@@ -71,7 +71,7 @@ class BigList:
         Path(self.root).mkdir(parents=True, exist_ok=True)
 
         self.max_length = max_length
-        self.set = set()
+        self.set = []
         self.file_count = 0
         self.key = None
         self.cached_file = None
@@ -99,26 +99,26 @@ class BigList:
         self.save_set()
 
         if idx_file != self.cached_file:
-            self.cache = sorted(list(pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))), key=self.key)
+            self.cache = pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))
 
         self.cached_file = idx_file
         self.cache.insert(idx_elem, value)  # value inserted
         move_object = self.cache[-1]
         del self.cache[-1]
         with open(f"{self.root}/{idx_file}.pkl", "wb") as f:
-            pickle.dump(set(self.cache), f)
+            pickle.dump(self.cache, f)
 
         # move values
         indicator = self.max_length == len(self.cache)
         for c in range(idx_file + 1, self.file_count):
-            self.cache = sorted(list(pickle.load(open(f"{self.root}/{c}.pkl", "rb"))), key=self.key)
+            self.cache = pickle.load(open(f"{self.root}/{c}.pkl", "rb"))
             self.cached_file = c
             indicator = self.max_length == len(self.cache)
             self.cache.insert(0, move_object)
             move_object = self.cache[-1]
             del self.cache[-1]
             with open(f"{self.root}/{c}.pkl", "wb") as f:
-                pickle.dump(set(self.cache), f)
+                pickle.dump(self.cache, f)
         if indicator:
             self.add(move_object)
 
@@ -147,23 +147,23 @@ class BigList:
         self.save_set()
 
         if self.file_count - 1 != self.cached_file:
-            self.cache = sorted(list(pickle.load(open(f"{self.root}/{self.file_count - 1}.pkl", "rb"))), key=self.key)
+            self.cache = pickle.load(open(f"{self.root}/{self.file_count - 1}.pkl", "rb"))
             self.cached_file = self.file_count - 1
 
         res = self.cache.pop()
         with open(f"{self.root}/{self.file_count - 1}.pkl", "wb") as f:
-            pickle.dump(set(self.cache), f)
+            pickle.dump(sorted(self.cache, key=self.key), f)
 
         return res
 
     def append(self, element):
-        self.add(element)
+        self.append(element)
 
     def set_len(self):
         self.len = len(self)
 
     def add(self, element):
-        self.set.add(element)
+        self.set.append(element)
         if len(self.set) >= self.max_length:
             self.save_set()
 
@@ -171,8 +171,8 @@ class BigList:
         # Todo balances, that indexing still is true
         if len(self.set) > 0:
             with open(f"{self.root}/{self.file_count}.pkl", "wb") as f:
-                pickle.dump(self.set, f)
-                self.set.clear()
+                pickle.dump(sorted(self.set, key=self.key), f)
+                del self.set[:]
                 self.file_count += 1
 
     def set_key(self, key):
@@ -185,69 +185,69 @@ class BigList:
 
     def sort(self, reverse: bool = False):
         """
-        self.cached_file = None
-        self.save_set()
+        def sort(lst):
+        pointer = [0 for _ in range(len(lst))]
+        res = []
 
-        chunks = [f"{self.root}/{c}.pkl" for c in range(self.file_count)]
-        old_root = self.root
-        self.root = f"{self.root}_{hash(time.time())}"
-        Path(self.root).mkdir(parents=True, exist_ok=True)
-        self.file_count = 0
+        # init
+        values = []
+        for c in range(len(lst)):
+            tmp = lst[c]
+            values.append(tmp[0])
 
-        for elem in merge(chunks, key=self.key, reverse=reverse):
-            self.add(elem)
+        while True:
+            idx = values.index(min(values))  # get idx of min value
+            res.append(values[idx])  # add smallest value
 
-        shutil.rmtree(old_root, ignore_errors=True)
+            tmp = lst[idx]
+            if pointer[idx] == len(tmp) - 1:
+                del values[idx]
+                del pointer[idx]
+                del lst[idx]
+            else:
+                pointer[idx] += 1  # add smallest value
+                values[idx] = tmp[pointer[idx]]
+
+            if len(values) == 0:
+                break
+
+        return res
+
+        import random
+        sort([sorted([random.randint(0, 2) for _ in range(10)]) for _ in range(5)])
         """
         # Todo implement stack sort merge
         #   1. always scan for the "smallest values" firest value. Store it for all arrays to search ...
         self.save_set()
 
         pointer = [0 for _ in range(self.file_count)]
-        skips = [False for _ in range(self.file_count)]
         res = BigList(self.root, self.max_length)
+        files = [f"{self.root}/{c}.pkl" for c in range(self.file_count)]
 
-        value = None
-        idx = None
+        # init
+        values = []
+        for file in files:
+            tmp = pickle.load(open(file, "rb"))
+            values.append(self.key(tmp[0]))
 
         while True:
-            if idx is None:
-                values = []
-                for c in range(self.file_count):
-                    tmp = pickle.load(open(f"{self.root}/{c}.pkl", "rb"))
-                    tmp = sorted(list(tmp), key=self.key)
-                    if len(tmp) == pointer[c]:  # ignore file
-                        values.append(None)
-                        skips[c] = True
-                    else:
-                        values.append(tmp[pointer[c]])
-            else:
-                tmp = pickle.load(open(f"{self.root}/{idx}.pkl", "rb"))
-                tmp = sorted(list(tmp), key=self.key)
-                if len(tmp) == pointer[idx]:  # ignore file
-                    values[idx] = None
-                    skips[idx] = True
-                    # pointer[idx] -= 1
-                else:
-                    values[idx] = tmp[pointer[idx]]
+            idx = values.index(min(values))  # get idx of min value
+            res.add(values[idx])  # add smallest value
 
-            start_idx = 0
-            for idx_i, value_i in enumerate(values):
-                if skips[idx_i]:
-                    start_idx = idx_i
-                    continue
-                if idx_i == start_idx + 1:
-                    value = value_i
-                    idx = idx_i
-                elif value is not None:
-                    if self.key(value) > self.key(value_i):
-                        value = value_i
-                        idx = idx_i
-            if sum(skips) == len(skips):
-                break
+            tmp = pickle.load(open(files[idx], "rb"))
+            if pointer[idx] == len(tmp) - 1:
+                del values[idx]
+                del pointer[idx]
+                del files[idx]
             else:
-                res.add(value)
-            pointer[idx] += 1
+                print(values[idx])
+                pointer[idx] += 1  # add smallest value
+                values[idx] = self.key(tmp[pointer[idx]])
+                print(values[idx])
+                print()
+
+            if len(values) == 0:
+                break
 
         res.save_set()
         return res
@@ -259,11 +259,13 @@ if __name__ == '__main__':
 
     for i in range(int(100)):
         a.add((-1 * random.randint(0, 10), -1 * random.randint(0, 10)))
+        # a.add((-1 * i, -1 * i))
 
     a.save_set()
     a.set_key(lambda tup: tup[-1])
     a = a.sort()
 
     a.set_len()
-    for i in a:
-        print(i)
+    for idx, i in enumerate(a):
+        pass
+        print(idx, i)
