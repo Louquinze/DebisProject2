@@ -211,9 +211,6 @@ class BigList:
         idx = None
 
         while True:
-            if sum(skips) == len(skips):
-                break
-
             if idx is None:
                 values = []
                 for c in range(self.file_count):
@@ -227,22 +224,29 @@ class BigList:
             else:
                 tmp = pickle.load(open(f"{self.root}/{idx}.pkl", "rb"))
                 tmp = sorted(list(tmp), key=self.key)
-                if len(tmp) == pointer[idx] or skips[idx]:  # ignore file
+                if len(tmp) == pointer[idx]:  # ignore file
                     values[idx] = None
                     skips[idx] = True
+                    # pointer[idx] -= 1
                 else:
                     values[idx] = tmp[pointer[idx]]
 
+            start_idx = 0
             for idx_i, value_i in enumerate(values):
                 if skips[idx_i]:
+                    start_idx = idx_i
                     continue
-                if idx_i == 0:
+                if idx_i == start_idx + 1:
                     value = value_i
                     idx = idx_i
-                elif self.key(value) > self.key(value_i):
-                    value = value_i
-                    idx = idx_i
-            res.add(value)
+                elif value is not None:
+                    if self.key(value) > self.key(value_i):
+                        value = value_i
+                        idx = idx_i
+            if sum(skips) == len(skips):
+                break
+            else:
+                res.add(value)
             pointer[idx] += 1
 
         res.save_set()
@@ -250,10 +254,11 @@ class BigList:
 
 
 if __name__ == '__main__':
-    a = BigList(root="tmp", max_length=1000)
+    import random
+    a = BigList(root="tmp", max_length=10)
 
     for i in range(int(100)):
-        a.add((-1 * i, -1 * i))
+        a.add((-1 * random.randint(0, 10), -1 * random.randint(0, 10)))
 
     a.save_set()
     a.set_key(lambda tup: tup[-1])
