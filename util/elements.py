@@ -180,6 +180,7 @@ class BigList:
             yield f"{self.root}/{c}.pkl"
 
     def sort(self, reverse: bool = False):
+        """
         self.cached_file = None
         self.save_set()
 
@@ -193,6 +194,21 @@ class BigList:
             self.add(elem)
 
         shutil.rmtree(old_root, ignore_errors=True)
+        """
+        # Todo implement stack sort merge
+        #   1. always scan for the "smallest values" firest value. Store it for all arrays to search ...
+        # init
+        heap = BigList(self.root, self.max_length)
+        for c in range(self.file_count):
+            file = f"{self.root}/{c}.pkl"
+            tmp = sorted(list(pickle.load(open(file, "rb"))), key=self.key)
+            heap.append(tmp[0])
+            del tmp[0]
+            self.cached_file = c
+        # now insert smallest and load new smallest
+        # check if list is empty, if all are empty end the loop
+
+        raise NotImplementedError
 
 
 if __name__ == '__main__':
