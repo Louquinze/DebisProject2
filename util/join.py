@@ -124,10 +124,8 @@ def hashsortjoin(partition_1, partition_2, memory_limit: int = 2):
 def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool = False):
     # create a hash_table for both p
     if sorted:
-        partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
-        partition_2.set_key(key=lambda tup: tup[0])  # sort second part with respect to the subject
-        partition_1.sort()
-        partition_2.sort()
+        partition_1.sort(key=lambda tup: tup[-1])
+        partition_2.sort(key=lambda tup: tup[0])
 
     partition_1.set_len()
     partition_2.set_len()
@@ -152,14 +150,8 @@ def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool 
 
 def sortmergejoin(partition_1, partition_2):
     # Todo apdate this that i can use any object with inplace sorting
-    partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
-    partition_2.set_key(key=lambda tup: tup[0])  # sort second part with respect to the subject
-
-    partition_1 = partition_1.sort()
-    partition_2 = partition_2.sort()
-
-    partition_1.set_key(key=lambda tup: tup[-1])  # sort first part with respect to the object
-    partition_2.set_key(key=lambda tup: tup[0])  # sort second part with respect to the subject
+    partition_1 = partition_1.sort(key=lambda tup: tup[-1])
+    partition_2 = partition_2.sort(key=lambda tup: tup[0])
 
     len_p_1 = len(partition_1) - 1
     len_p_2 = len(partition_2) - 1
