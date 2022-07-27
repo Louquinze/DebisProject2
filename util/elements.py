@@ -221,51 +221,44 @@ class BigList:
         self.save_set()
 
         pointer = [0 for _ in range(self.file_count)]
-        res = BigList(self.root, self.max_length)
+        # res = BigList(self.root, self.max_length)
         files = [f"{self.root}/{c}.pkl" for c in range(self.file_count)]
 
         # init
         values = []
         for file in files:
             tmp = pickle.load(open(file, "rb"))
-            values.append(self.key(tmp[0]))
+            values.append(tmp[0])
 
         while True:
-            idx = values.index(min(values))  # get idx of min value
-            res.add(values[idx])  # add smallest value
+            idx = values.index(min(values, key=self.key))  # get idx of min value
+            # res.add(values[idx])  # add smallest value
+            yield values[idx]  # add smallest value
 
-            tmp = pickle.load(open(files[idx], "rb"))
-            if pointer[idx] == len(tmp) - 1:
-                del values[idx]
+            pointer[idx] += 1
+            file = files[idx]
+            if pointer[idx] == len(pickle.load(open(file, "rb"))):
                 del pointer[idx]
+                del values[idx]
                 del files[idx]
             else:
-                print(values[idx])
-                pointer[idx] += 1  # add smallest value
-                values[idx] = self.key(tmp[pointer[idx]])
-                print(values[idx])
-                print()
-
-            if len(values) == 0:
+                values[idx] = pickle.load(open(file, "rb"))[pointer[idx]]
+            if len(files) == 0:
                 break
-
-        res.save_set()
-        return res
 
 
 if __name__ == '__main__':
     import random
     a = BigList(root="tmp", max_length=10)
+    a.set_key(lambda tup: tup[-1])
 
     for i in range(int(100)):
-        a.add((-1 * random.randint(0, 10), -1 * random.randint(0, 10)))
+        a.add((-1 * random.randint(0, 5), -1 * random.randint(0, 5)))
         # a.add((-1 * i, -1 * i))
 
     a.save_set()
-    a.set_key(lambda tup: tup[-1])
-    a = a.sort()
+    # a = a.sort()
 
     a.set_len()
-    for idx, i in enumerate(a):
-        pass
+    for idx, i in enumerate(a.sort()):
         print(idx, i)
