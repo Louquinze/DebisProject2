@@ -66,6 +66,8 @@ if __name__ == '__main__':
             print(idx, elem)
     del follows
     del friendOf
+
+    Join_1.save_set()
     print("finished Join_1")
     # __________________________________________________________________________________________________________________
     if args.dataset == 1:
@@ -117,6 +119,8 @@ if __name__ == '__main__':
             print(idx, elem)
     del likes
     del hasReview
+
+    Join_2.save_set()
     print("finished Join_2")
 
     # 0: hashjoin, 1: sortmergejoin, 3: hashsortjoin

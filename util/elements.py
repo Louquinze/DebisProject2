@@ -13,7 +13,9 @@ class BigDict:
     # if sys.getsizeof(hash_table) / 1e6 > memory_limit:
     def __init__(self, root, memory_limit: int = 2):
         self.root = root + f"_{hash(time.time())}"
+        self.drive_loc = root + f"_{hash(time.time())}_loc"
         Path(self.root).mkdir(parents=True, exist_ok=True)
+        Path(self.drive_loc).mkdir(parents=True, exist_ok=True)
 
         self.memory_limit = memory_limit
         self.hash_table = dict()
@@ -27,9 +29,14 @@ class BigDict:
             self.hash_table[key].add(value)
         else:
             if key in self.drive_location:
-                self.drive_location[key].add(self.file_count)
+                store = pickle.load(open(self.drive_location[key], "rb"))
+                store.add(self.file_count)
+                with open(self.drive_location[key], "wb") as f:
+                    pickle.dump(store, f)
             else:
-                self.drive_location[key] = {self.file_count}
+                self.drive_location[key] = f"{self.drive_loc}/{time.time()}.pkl"
+                with open(self.drive_location[key], "wb") as f:
+                    pickle.dump({self.file_count}, f)
             self.hash_table[key] = {value}
 
         if sys.getsizeof(self.hash_table) / 1e6 > self.memory_limit:
@@ -39,7 +46,8 @@ class BigDict:
         self.save_set()
         if item not in self.drive_location:
             raise KeyError
-        for i, idx_file in enumerate(self.drive_location[item]):
+        store = pickle.load(open(self.drive_location[item], "rb"))
+        for i, idx_file in enumerate(store):
             if self.loaded_file != idx_file:
                 self.loaded_file = idx_file
                 self.cache = pickle.load(open(f"{self.root}/{idx_file}.pkl", "rb"))
@@ -51,6 +59,7 @@ class BigDict:
 
     def __del__(self):
         shutil.rmtree(self.root, ignore_errors=True)
+        shutil.rmtree(self.drive_loc, ignore_errors=True)
 
     def save_set(self):
         # Todo balances, that indexing still is true
@@ -219,7 +228,9 @@ class BigList:
         res = BigList(self.root, self.max_length)
         files = [f"{self.root}/{c}.pkl" for c in range(self.file_count)]
 
-        for file in files:  # sort all list
+        for i, file in enumerate(files):  # sort all list
+            if i % 500 == 0:
+                print(f"sort sub arry {i+1}")
             lst = pickle.load(open(file, "rb"))
             with open(file, "wb") as f:
                 pickle.dump(sorted(lst, key=key), f)
@@ -238,6 +249,7 @@ class BigList:
             pointer[idx] += 1
             loaded_lst = pickle.load(open(files[idx], "rb"))
             if pointer[idx] == len(loaded_lst):
+                print(f"del {files[idx]} from disk")
                 del pointer[idx]
                 del values[idx]
                 del files[idx]

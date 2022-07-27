@@ -46,6 +46,9 @@ def get_vertical_partitions(key, int_dict: dict = None, str_dict: dict = None, b
 
 
 def hashjoin(partition_1, partition_2, memory_limit: int = 2):
+    partition_1.save_set()
+    partition_2.save_set()
+
     partition_1.set_len()
     partition_2.set_len()
 
@@ -82,12 +85,14 @@ def hashjoin(partition_1, partition_2, memory_limit: int = 2):
 
 
 def hashsortjoin(partition_1, partition_2, memory_limit: int = 2):
+    partition_1.save_set()
+    partition_2.save_set()
+
     partition_1.set_len()
     partition_2.set_len()
 
     # sort first part with respect to the subject, less fragmentation on avg
-    partition_2.set_key(key=lambda tup: tup[0])
-    partition_2.sort()
+    partition_2 = partition_2.sort(key=lambda tup: tup[0])
 
     len_p_1 = partition_1.len  # Todo this is redundant
     idx_p_1 = 0
@@ -122,6 +127,9 @@ def hashsortjoin(partition_1, partition_2, memory_limit: int = 2):
 
 
 def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool = False):
+    partition_1.save_set()
+    partition_2.save_set()
+
     # create a hash_table for both p
     if sorted:
         partition_1.sort(key=lambda tup: tup[-1])
@@ -149,9 +157,15 @@ def gracehashjoin(partition_1, partition_2, memory_limit: int = 2, sorted: bool 
 
 
 def sortmergejoin(partition_1, partition_2):
+    partition_1.save_set()
+    partition_2.save_set()
+
     # Todo apdate this that i can use any object with inplace sorting
+    print(f"sort p1")
     partition_1 = partition_1.sort(key=lambda tup: tup[-1])
+    print(f"sort p1")
     partition_2 = partition_2.sort(key=lambda tup: tup[0])
+    print("finished sorting")
 
     len_p_1 = len(partition_1) - 1
     len_p_2 = len(partition_2) - 1
